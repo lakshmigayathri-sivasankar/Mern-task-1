@@ -1,9 +1,12 @@
 const express = require("express");
 const colors = require("colors");
 const dotenv = require("dotenv");
-const { errorHandler } = require("./employee.middleware");
+const { errorHandler } = require("./middleware/employee.middleware");
 const connectDB = require("./config/db");
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 8080;
+const { authPage } = require("./auth");
+
+const authRouter = require("./routes/auth.route");
 
 dotenv.config({ path: "./config/config.env" });
 connectDB();
@@ -19,6 +22,12 @@ app.use(express.urlencoded({ extended: false }));
 // res.status(200).json({ message: "get goals" });
 //});
 
-app.use("/api/employeelist", require("./employee.routes"));
+app.use(
+  "/api/employee",
+  authPage(["teacher", "student"]),
+  require("./routes/employee.routes")
+);
+app.use("/api/auth", authRouter);
+
 app.use(errorHandler);
 app.listen(port, () => console.log(`server started on ${port}`));
